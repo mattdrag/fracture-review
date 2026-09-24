@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fracture Pod Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="styles.css?v=8">
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <span class="set-glyph">FRA</span>
+    <div>
+      <div class="brand-name">Reality Fracture</div>
+      <p class="sub">Pod set review</p>
+    </div>
+  </div>
+  <nav class="views" id="views" hidden>
+    <button data-view="review" class="on">My review</button>
+    <button data-view="results" id="resultsBtn" disabled title="Tick the box to unlock">Results</button>
+    <label class="unlock" title="Honor system: seeing everyone's grades can sway yours.">
+      <input type="checkbox" id="unlockResults">
+      <span>I understand this reveals everyone's grades</span>
+    </label>
+  </nav>
+  <div class="who" id="who" hidden>
+    <span id="whoName"></span>
+    <button class="link" id="switchUser">switch</button>
+  </div>
+</header>
+
+<div class="banner" id="demoBanner" hidden>
+  Demo mode: reviews are saved in this browser only. Add your Supabase keys to <code>config.js</code> to share with the pod.
+</div>
+
+<canvas id="shards" aria-hidden="true"></canvas>
+
+<!-- Landing / sign in -->
+<section id="gate" class="landing">
+  <div class="hero">
+    <div class="hero-art" id="heroArt"></div>
+    <svg class="cracks" viewBox="0 0 1200 700" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M600 0 L585 140 L640 230 L560 330 L610 440 L575 700" />
+      <path d="M585 140 L430 90 L300 150 L120 110" />
+      <path d="M640 230 L820 190 L960 260 L1200 220" />
+      <path d="M560 330 L380 380 L220 350" />
+      <path d="M610 440 L800 500 L1010 470" />
+    </svg>
+    <div class="hero-inner">
+      <h1 class="title"><span>Reality</span><span>Fracture</span></h1>
+      <p class="tagline">fuck LSV's dogshit reviews. decide for yourself</p>
+      <form id="gateForm" class="gate-form">
+        <input id="nameInput" autocomplete="nickname" maxlength="32" placeholder="Enter your name" required aria-label="Your name">
+        <input id="passInput" type="password" autocomplete="off" maxlength="32" placeholder="Passcode" required aria-label="Passcode">
+        <button type="submit" class="primary">Begin review</button>
+      </form>
+      <p class="gate-error" id="gateError" role="alert" hidden>Wrong passcode. Ask the pod for it.</p>
+      <p class="art-credit" id="artCredit"></p>
+    </div>
+  </div>
+</section>
+
+<main id="app" hidden>
+  <!-- Toolbar shared by both views -->
+  <div class="toolbar">
+    <div class="colors" id="colorTabs"></div>
+    <div class="filters">
+      <select id="rarityFilter" aria-label="Rarity">
+        <option value="">All rarities</option>
+        <option value="common">Commons</option>
+        <option value="uncommon">Uncommons</option>
+        <option value="rare">Rares</option>
+        <option value="mythic">Mythics</option>
+      </select>
+      <input id="search" type="search" placeholder="Search cards" aria-label="Search cards">
+      <select id="ungradedFilter" aria-label="Status" data-for="review">
+        <option value="">All cards</option>
+        <option value="ungraded">Ungraded only</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Review view -->
+  <section id="reviewView">
+    <div class="progress-row">
+      <div class="progress"><div id="progressBar"></div></div>
+      <span id="progressText" class="mono"></span>
+      <span id="saveState" class="save-state"></span>
+      <button id="submitBtn" class="primary">Submit review</button>
+    </div>
+    <div id="grid" class="grid"></div>
+  </section>
+
+  <!-- Results view -->
+  <section id="resultsView" hidden>
+    <div id="resultsBody">
+      <div class="roster" id="roster"></div>
+      <div class="results-controls">
+        <label class="check"><input type="checkbox" id="divergentOnly"> Divergent only</label>
+        <label class="range">Flag spread ≥ <input type="range" id="spreadMin" min="2" max="9" value="4"> <span id="spreadVal" class="mono"></span></label>
+        <label class="check"><input type="checkbox" id="showNames"> Show who gave which grade</label>
+        <label class="check"><input type="checkbox" id="submittedOnly" checked> Submitted reviews only</label>
+        <select id="sortBy" aria-label="Sort">
+          <option value="spread">Sort: biggest disagreement</option>
+          <option value="avg">Sort: highest average</option>
+          <option value="set">Sort: set order</option>
+        </select>
+      </div>
+      <div id="colorSummary" class="color-summary"></div>
+      <div id="resultsList" class="results-list"></div>
+    </div>
+  </section>
+</main>
+
+<!-- Card detail -->
+<dialog id="detail">
+  <div class="detail-inner">
+    <div class="detail-img"><img id="dImg" alt=""><button id="dFlip" class="link" hidden>Flip card</button></div>
+    <div class="detail-body">
+      <h2 id="dName"></h2>
+      <p id="dType" class="dtype"></p>
+      <div id="dText" class="otext"></div>
+      <div class="grade-picker" id="dGrades"></div>
+      <label for="dNote" class="lbl">Note (optional)</label>
+      <textarea id="dNote" rows="3" placeholder="Why this grade? Archetype, combat math, etc."></textarea>
+      <div class="detail-nav">
+        <button id="dPrev">← Prev</button>
+        <button id="dClose" class="primary">Done</button>
+        <button id="dNext">Next →</button>
+      </div>
+      <p class="hint">Keys: A B C D F set a grade, + / − nudge it, ← → next card, Esc closes.</p>
+    </div>
+  </div>
+</dialog>
+
+<script src="config.js?v=8"></script>
+<script src="app.js?v=8"></script>
+</body>
+</html>
