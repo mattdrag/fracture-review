@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Player Analysis · Reality Fracture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="styles.css?v=9">
+<link rel="stylesheet" href="analysis.css?v=1">
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <span class="set-glyph">FRA</span>
+    <div>
+      <div class="brand-name">Player Analysis</div>
+      <p class="sub">Reality Fracture · pod set review</p>
+    </div>
+  </div>
+  <a class="back-link" href="./">← Back to review</a>
+</header>
+
+<main class="an" id="an">
+  <p class="an-status" id="status">Loading your grades…</p>
+
+  <div id="report" hidden>
+    <!-- Profile -->
+    <section class="profile">
+      <div class="profile-main">
+        <p class="eyebrow-sm" id="pSub"></p>
+        <h1 class="pname" id="pName"></h1>
+        <div class="tags" id="pTags"></div>
+      </div>
+      <div class="profile-grade">
+        <span class="big-grade" id="pGrade"></span>
+        <span class="big-grade-lbl">Average grade</span>
+      </div>
+    </section>
+
+    <nav class="jump" id="jump" aria-label="Sections"></nav>
+
+    <section class="kpis" id="kpis"></section>
+
+    <section class="panel" id="sec-colors" data-title="Colors">
+      <header><h2>Colors</h2><p>Average grade in each color, and how deep each color is in cards you rate B- or better.</p></header>
+      <div class="split">
+        <div id="chColors"></div>
+        <div id="chColorDepth"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="sec-archetypes" data-title="Archetypes">
+      <header><h2>Two-color archetypes</h2><p><b>Deck strength</b>: the average of your best 23 cards castable in each pair (both mono-colors, that gold pair, and colorless). A stand-in for how good you think each deck is.</p></header>
+      <div id="chArch"></div>
+    </section>
+
+    <section class="panel" id="sec-dist" data-title="Distribution">
+      <header><h2>Grade distribution</h2><p>How many cards got each grade.</p></header>
+      <div id="chDist"></div>
+    </section>
+
+    <section class="panel two" id="sec-rarity" data-title="Rarity">
+      <div>
+        <header><h2>Rarity</h2><p>Average grade by rarity.</p></header>
+        <div id="chRarity"></div>
+      </div>
+      <div>
+        <header><h2>Color × rarity</h2><p>Average grade in each cell. Darker gold means higher.</p></header>
+        <div id="chHeat"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="sec-curve" data-title="Curve">
+      <header><h2>Mana curve</h2><p>Average grade by mana value. Do you value cheap interaction or big finishers?</p></header>
+      <div id="chCurve"></div>
+    </section>
+
+    <section class="panel two" id="sec-types" data-title="Types">
+      <div>
+        <header><h2>Card types</h2><p>Average grade by card type.</p></header>
+        <div id="chTypes"></div>
+      </div>
+      <div>
+        <header><h2>Keywords</h2><p>Keywords on at least 4 graded cards, ranked by average grade.</p></header>
+        <div id="chKeywords"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="sec-creatures" data-title="Creatures">
+      <header><h2>Creature bodies</h2><p>Each dot is a creature, placed by mana value and total power + toughness, and colored by grade. Up and to the left means more stats for the mana.</p></header>
+      <div id="chBodies"></div>
+    </section>
+
+    <section class="panel" id="sec-takes" data-title="Hot takes" data-needs-compare="1">
+      <header><h2>Hot takes</h2><p>Cards where you differ most from the comparison.</p></header>
+      <div class="split" id="chTakes"></div>
+    </section>
+
+    <section class="panel" id="sec-best" data-title="Best & worst">
+      <header><h2>Best &amp; worst</h2></header>
+      <div class="split" id="chBest"></div>
+    </section>
+
+    <section class="panel" id="sec-commons" data-title="Pick order">
+      <header><h2>Top commons by color</h2><p>This player's early-pick commons. What they'd take out of a pack.</p></header>
+      <div id="chCommons"></div>
+    </section>
+
+    <section class="panel" id="sec-tier" data-title="Tier list">
+      <header class="with-tools"><div><h2>Tier list</h2><p>Every graded card by grade. Click a card to enlarge it.</p></div>
+        <div class="seg" id="tierColors" role="group" aria-label="Filter tier list by color"></div></header>
+      <div id="chTier"></div>
+    </section>
+
+  </div>
+</main>
+
+<div class="tip" id="tip" role="tooltip" hidden></div>
+<dialog id="zoom"><img id="zoomImg" alt=""><p id="zoomCap"></p></dialog>
+
+<script src="config.js?v=9"></script>
+<script src="analysis.js?v=1"></script>
+</body>
+</html>

@@ -161,3 +161,6 @@ select option { background: var(--panel-solid); }
 /* Front page is just the hero: hide the top bar while the landing is showing */
 body:has(#gate:not([hidden])) .top { display: none; }
 body:has(#gate:not([hidden])) .hero { min-height: 100vh; }
+
+.nav-link { border: 1px solid var(--line); background: var(--panel); border-radius: 6px; padding: 6px 12px; color: var(--ink); text-decoration: none; }
+.nav-link:hover { border-color: var(--accent); }
