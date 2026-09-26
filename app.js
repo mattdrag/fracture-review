@@ -67,7 +67,7 @@
     return cols.length > 1 ? "M" : cols[0];
   }
   async function loadCards() {
-    const cacheKey = `rf_cards_v2_${CFG.SET_CODE}`;
+    const cacheKey = `rf_cards_v3_${CFG.SET_CODE}`;
     try {
       const cached = JSON.parse(localStorage.getItem(cacheKey) || "null");
       if (cached && Date.now() - cached.t < 12 * 3600e3) return cached.cards;
@@ -81,7 +81,7 @@
         const faces = c.card_faces || [c];
         out.push({
           id: c.id, name: c.name, cn: parseInt(c.collector_number, 10), rarity: c.rarity,
-          color: cardColor(c), cmc: c.cmc,
+          color: cardColor(c), cmc: c.cmc, keywords: c.keywords || [],
           img: (c.image_uris || faces[0].image_uris).normal,
           small: (c.image_uris || faces[0].image_uris).small,
           art: (c.image_uris || faces[0].image_uris).art_crop, artist: c.artist,
@@ -102,9 +102,13 @@
   function filtered({ forReview }) {
     const rar = $("rarityFilter").value, q = $("search").value.trim().toLowerCase();
     const ungraded = forReview && $("ungradedFilter").value === "ungraded";
+    const mv = $("cmcFilter").value, type = $("typeFilter").value, kw = $("keywordFilter").value;
     return cards.filter((c) =>
       (color === "all" || c.color === color) &&
       (!rar || c.rarity === rar) &&
+      (mv === "" || (mv === "7" ? c.cmc >= 7 : Math.floor(c.cmc) === +mv)) &&
+      (!type || c.type.split("//")[0].includes(type)) &&
+      (!kw || c.keywords.includes(kw)) &&
       (!q || c.name.toLowerCase().includes(q) || c.type.toLowerCase().includes(q)) &&
       (!ungraded || me.grades[c.id] == null));
   }
@@ -142,7 +146,24 @@
     return [...list].sort((a, b) => f(a, b) || a.cn - b.cn);
   }
 
+  // Color sort only makes sense when every color is on screen
+  function syncSortOptions() {
+    const colorOpt = $("cardSort").querySelector('option[value="color"]');
+    colorOpt.hidden = colorOpt.disabled = color !== "all";
+    if (color !== "all" && $("cardSort").value === "color") $("cardSort").value = "set";
+  }
+  const FILTER_IDS = ["rarityFilter", "cmcFilter", "typeFilter", "keywordFilter", "search"];
+  function populateFilters() {
+    const kws = {};
+    cards.forEach((c) => c.keywords.forEach((k) => (kws[k] = (kws[k] || 0) + 1)));
+    $("keywordFilter").insertAdjacentHTML("beforeend", Object.keys(kws).sort().map((k) => `<option value="${esc(k)}">${esc(k)} (${kws[k]})</option>`).join(""));
+    const types = ["Creature", "Instant", "Sorcery", "Enchantment", "Artifact", "Planeswalker", "Battle", "Land"]
+      .filter((t) => cards.some((c) => c.type.split("//")[0].includes(t)));
+    $("typeFilter").insertAdjacentHTML("beforeend", types.map((t) => `<option>${t}</option>`).join(""));
+  }
+
   function renderReview() {
+    syncSortOptions();
     const list = sortCards(filtered({ forReview: true }));
     detailList = list;
     const opts = `<option value="">—</option>` + GRADES.map((g, i) => `<option value="${i}">${g}</option>`).reverse().join("");
@@ -286,6 +307,7 @@
     $("resultsView").hidden = view !== "results";
     $("ungradedFilter").hidden = view !== "review";
     $("cardSort").hidden = view !== "review";
+    $("clearFilters").hidden = !FILTER_IDS.some((id) => $(id).value.trim());
     document.querySelectorAll("#views button").forEach((b) => b.classList.toggle("on", b.dataset.view === view));
     view === "review" ? renderReview() : renderResults();
   }
@@ -339,9 +361,10 @@
   });
   $("unlockResults").addEventListener("change", (e) => setUnlocked(e.target.checked));
   $("colorTabs").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) { color = b.dataset.c; render(); } });
+  $("clearFilters").addEventListener("click", () => { FILTER_IDS.forEach((id) => ($(id).value = "")); render(); });
   $("cardSort").addEventListener("change", () => { try { localStorage.setItem("rf_sort", $("cardSort").value); } catch {} render(); });
   try { const saved = localStorage.getItem("rf_sort"); if (saved && SORTS[saved]) $("cardSort").value = saved; } catch {}
-  ["rarityFilter", "ungradedFilter", "sortBy", "divergentOnly", "showNames", "submittedOnly"].forEach((id) => $(id).addEventListener("change", render));
+  ["cmcFilter", "typeFilter", "keywordFilter", "rarityFilter", "ungradedFilter", "sortBy", "divergentOnly", "showNames", "submittedOnly"].forEach((id) => $(id).addEventListener("change", render));
   $("search").addEventListener("input", render);
   $("spreadMin").addEventListener("input", render);
 
@@ -447,6 +470,7 @@
       return;
     }
     cards.forEach((c) => (byId[c.id] = c));
+    populateFilters();
     renderLanding();
     syncPassField();
     let saved = null; try { saved = localStorage.getItem("rf_me"); } catch {}

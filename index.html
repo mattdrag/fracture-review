@@ -6,7 +6,7 @@
 <title>Fracture Pod Review</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
-<link rel="stylesheet" href="styles.css?v=10">
+<link rel="stylesheet" href="styles.css?v=12">
 </head>
 <body>
 
@@ -69,16 +69,28 @@
   <div class="toolbar">
     <div class="colors" id="colorTabs"></div>
     <div class="filters">
+      <select id="cmcFilter" aria-label="Mana value">
+        <option value="">Any mana value</option>
+        <option value="0">MV 0</option><option value="1">MV 1</option><option value="2">MV 2</option><option value="3">MV 3</option>
+        <option value="4">MV 4</option><option value="5">MV 5</option><option value="6">MV 6</option><option value="7">MV 7+</option>
+      </select>
       <select id="rarityFilter" aria-label="Rarity">
-        <option value="">All rarities</option>
+        <option value="">Any rarity</option>
         <option value="common">Commons</option>
         <option value="uncommon">Uncommons</option>
         <option value="rare">Rares</option>
         <option value="mythic">Mythics</option>
       </select>
+      <select id="typeFilter" aria-label="Card type">
+        <option value="">All types</option>
+      </select>
+      <select id="keywordFilter" aria-label="Keyword">
+        <option value="">Any keyword</option>
+      </select>
+      <button id="clearFilters" class="link" hidden>Clear filters</button>
       <input id="search" type="search" placeholder="Search cards" aria-label="Search cards">
       <select id="cardSort" aria-label="Sort cards">
-        <option value="set">Sort: set number</option>
+        <option value="set">Sort: card number</option>
         <option value="cmc">Sort: mana value (low → high)</option>
         <option value="cmc-desc">Sort: mana value (high → low)</option>
         <option value="name">Sort: name (A → Z)</option>
@@ -150,7 +162,7 @@
   </div>
 </dialog>
 
-<script src="config.js?v=10"></script>
-<script src="app.js?v=10"></script>
+<script src="config.js?v=12"></script>
+<script src="app.js?v=12"></script>
 </body>
 </html>
