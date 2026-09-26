@@ -6,7 +6,7 @@
 <title>Fracture Pod Review</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
-<link rel="stylesheet" href="styles.css?v=9">
+<link rel="stylesheet" href="styles.css?v=10">
 </head>
 <body>
 
@@ -77,6 +77,17 @@
         <option value="mythic">Mythics</option>
       </select>
       <input id="search" type="search" placeholder="Search cards" aria-label="Search cards">
+      <select id="cardSort" aria-label="Sort cards">
+        <option value="set">Sort: set number</option>
+        <option value="cmc">Sort: mana value (low → high)</option>
+        <option value="cmc-desc">Sort: mana value (high → low)</option>
+        <option value="name">Sort: name (A → Z)</option>
+        <option value="rarity">Sort: rarity (mythic first)</option>
+        <option value="color">Sort: color (WUBRG)</option>
+        <option value="type">Sort: card type</option>
+        <option value="grade">Sort: your grade (high → low)</option>
+        <option value="grade-asc">Sort: your grade (low → high)</option>
+      </select>
       <select id="ungradedFilter" aria-label="Status" data-for="review">
         <option value="">All cards</option>
         <option value="ungraded">Ungraded only</option>
@@ -108,6 +119,8 @@
           <option value="spread">Sort: biggest disagreement</option>
           <option value="avg">Sort: highest average</option>
           <option value="set">Sort: set order</option>
+          <option value="cmc">Sort: mana value</option>
+          <option value="name">Sort: name</option>
         </select>
       </div>
       <div id="colorSummary" class="color-summary"></div>
@@ -137,7 +150,7 @@
   </div>
 </dialog>
 
-<script src="config.js?v=9"></script>
-<script src="app.js?v=9"></script>
+<script src="config.js?v=10"></script>
+<script src="app.js?v=10"></script>
 </body>
 </html>

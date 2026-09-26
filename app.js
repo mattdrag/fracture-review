@@ -121,8 +121,29 @@
   }
 
   // ---------- Review view ----------
+  // Review-grid sort orders; ties fall back to set number
+  const RARITY_RANK = { mythic: 0, rare: 1, uncommon: 2, common: 3 };
+  const COLOR_RANK = { W: 0, U: 1, B: 2, R: 3, G: 4, M: 5, C: 6 };
+  const TYPE_RANK = ["Creature", "Planeswalker", "Instant", "Sorcery", "Enchantment", "Artifact", "Battle", "Land"];
+  const typeRank = (c) => { const i = TYPE_RANK.findIndex((t) => c.type.split("//")[0].includes(t)); return i < 0 ? 99 : i; };
+  const SORTS = {
+    set: () => 0,
+    cmc: (a, b) => a.cmc - b.cmc,
+    "cmc-desc": (a, b) => b.cmc - a.cmc,
+    name: (a, b) => a.name.localeCompare(b.name),
+    rarity: (a, b) => RARITY_RANK[a.rarity] - RARITY_RANK[b.rarity],
+    color: (a, b) => COLOR_RANK[a.color] - COLOR_RANK[b.color],
+    type: (a, b) => typeRank(a) - typeRank(b),
+    grade: (a, b) => (me.grades[b.id] ?? -1) - (me.grades[a.id] ?? -1),
+    "grade-asc": (a, b) => (me.grades[a.id] ?? 99) - (me.grades[b.id] ?? 99),
+  };
+  function sortCards(list) {
+    const f = SORTS[$("cardSort").value] || SORTS.set;
+    return [...list].sort((a, b) => f(a, b) || a.cn - b.cn);
+  }
+
   function renderReview() {
-    const list = filtered({ forReview: true });
+    const list = sortCards(filtered({ forReview: true }));
     detailList = list;
     const opts = `<option value="">—</option>` + GRADES.map((g, i) => `<option value="${i}">${g}</option>`).reverse().join("");
     $("grid").innerHTML = list.length ? list.map((c, i) => {
@@ -221,7 +242,11 @@
     let list = rows.filter((r) => r.s);
     if ($("divergentOnly").checked) list = list.filter((r) => r.s.n > 1 && r.s.spread >= minSpread);
     const sort = $("sortBy").value;
-    list.sort(sort === "avg" ? (a, b) => b.s.avg - a.s.avg : sort === "set" ? (a, b) => a.c.cn - b.c.cn : (a, b) => b.s.spread - a.s.spread || b.s.sd - a.s.sd);
+    list.sort(sort === "avg" ? (a, b) => b.s.avg - a.s.avg
+      : sort === "set" ? (a, b) => a.c.cn - b.c.cn
+      : sort === "cmc" ? (a, b) => a.c.cmc - b.c.cmc || a.c.cn - b.c.cn
+      : sort === "name" ? (a, b) => a.c.name.localeCompare(b.c.name)
+      : (a, b) => b.s.spread - a.s.spread || b.s.sd - a.s.sd);
     detailList = list.map((r) => r.c);
 
     $("resultsList").innerHTML = list.length ? list.map((r, i) => {
@@ -260,6 +285,7 @@
     $("reviewView").hidden = view !== "review";
     $("resultsView").hidden = view !== "results";
     $("ungradedFilter").hidden = view !== "review";
+    $("cardSort").hidden = view !== "review";
     document.querySelectorAll("#views button").forEach((b) => b.classList.toggle("on", b.dataset.view === view));
     view === "review" ? renderReview() : renderResults();
   }
@@ -313,6 +339,8 @@
   });
   $("unlockResults").addEventListener("change", (e) => setUnlocked(e.target.checked));
   $("colorTabs").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) { color = b.dataset.c; render(); } });
+  $("cardSort").addEventListener("change", () => { try { localStorage.setItem("rf_sort", $("cardSort").value); } catch {} render(); });
+  try { const saved = localStorage.getItem("rf_sort"); if (saved && SORTS[saved]) $("cardSort").value = saved; } catch {}
   ["rarityFilter", "ungradedFilter", "sortBy", "divergentOnly", "showNames", "submittedOnly"].forEach((id) => $(id).addEventListener("change", render));
   $("search").addEventListener("input", render);
   $("spreadMin").addEventListener("input", render);
