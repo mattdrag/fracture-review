@@ -108,7 +108,7 @@
       (!rar || c.rarity === rar) &&
       (mv === "" || (mv === "7" ? c.cmc >= 7 : Math.floor(c.cmc) === +mv)) &&
       (!type || c.type.split("//")[0].includes(type)) &&
-      (!kw || c.keywords.includes(kw)) &&
+      (!kw || hasKeyword(c, kw)) &&
       (!q || c.name.toLowerCase().includes(q) || c.type.toLowerCase().includes(q)) &&
       (!ungraded || me.grades[c.id] == null));
   }
@@ -152,10 +152,22 @@
     colorOpt.hidden = colorOpt.disabled = color !== "all";
     if (color !== "all" && $("cardSort").value === "color") $("cardSort").value = "set";
   }
+  // A card matches a keyword if Scryfall lists it, or the word appears in its rules text
+  // (so "Creatures you control have trample" counts for Trample). The card's own name is
+  // removed first so a name like "Flying Squirrel" doesn't count.
+  const kwRegex = {};
+  function hasKeyword(c, k) {
+    if (c.keywords.includes(k)) return true;
+    const escaped = k.replace(/[.*+?^$()|[\]\\{}]/g, "\\$&");
+    const re = (kwRegex[k] ||= new RegExp("\\b" + escaped + "\\b", "i"));
+    const text = c.name.split(" // ").reduce((t, n) => t.split(n).join(""), c.text || "");
+    return re.test(text);
+  }
   const FILTER_IDS = ["rarityFilter", "cmcFilter", "typeFilter", "keywordFilter", "search"];
   function populateFilters() {
     const kws = {};
-    cards.forEach((c) => c.keywords.forEach((k) => (kws[k] = (kws[k] || 0) + 1)));
+    const all = [...new Set(cards.flatMap((c) => c.keywords))];
+    all.forEach((k) => (kws[k] = cards.filter((c) => hasKeyword(c, k)).length));
     $("keywordFilter").insertAdjacentHTML("beforeend", Object.keys(kws).sort().map((k) => `<option value="${esc(k)}">${esc(k)} (${kws[k]})</option>`).join(""));
     const types = ["Creature", "Instant", "Sorcery", "Enchantment", "Artifact", "Planeswalker", "Battle", "Land"]
       .filter((t) => cards.some((c) => c.type.split("//")[0].includes(t)));
