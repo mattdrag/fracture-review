@@ -312,13 +312,13 @@
     const rows = pod.map((p) => {
       const shared = graded(me.grades).filter((c) => p.grades?.[c.id] != null);
       const diffs = shared.map((c) => me.grades[c.id] - p.grades[c.id]);
-      return { name: p.display, n: shared.length, abs: mean(diffs.map(Math.abs)), signed: mean(diffs) };
+      return { name: p.display, n: shared.length, abs: mean(diffs.map(Math.abs)), signed: mean(diffs), exact: diffs.filter((d) => d === 0).length };
     }).filter((r) => r.n).sort((a, b) => a.abs - b.abs);
     if (!rows.length) { $("chAlign").innerHTML = `<p class="empty-note">No cards in common with anyone yet.</p>`; return; }
     const max = Math.max(2, ...rows.map((r) => r.abs));
     const lean = (v) => Math.abs(v) < 0.05 ? "no overall lean" : `you grade ${Math.abs(v).toFixed(1)} steps ${v > 0 ? "higher" : "lower"} on average`;
     const body = rows.map((r, i) => {
-      const tipTxt = `<b>${esc(r.name)}</b><br>Average difference: ${r.abs.toFixed(2)} steps<br>${lean(r.signed)}<br><span class="m">${r.n} cards in common</span>`;
+      const tipTxt = `<b>${esc(r.name)}</b><br>Average difference: ${r.abs.toFixed(2)} steps<br>${lean(r.signed)}<br>Exact same grade on ${r.exact} cards <span class="m">(${Math.round((r.exact / r.n) * 100)}%)</span>`;
       return `<div class="hb-lbl">${esc(r.name)}${i === 0 ? `<small>closest</small>` : ""}</div>
         <div class="hb-track" data-tip="${esc(tipTxt)}"><div class="hb-bar" style="width:${(r.abs / max) * 100}%;${i === 0 ? "background:var(--gold)" : ""}"></div></div>
         <div class="hb-val">${r.abs.toFixed(1)}<em>steps</em></div>`;
