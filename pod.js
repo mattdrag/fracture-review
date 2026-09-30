@@ -285,6 +285,123 @@
     }).join("");
   }
 
+  // ---------- Rivals & soulmates ----------
+  function pairStats(a, b) {
+    const shared = cards.filter((c) => a.g[c.id] != null && b.g[c.id] != null);
+    const d = shared.map((c) => a.g[c.id] - b.g[c.id]);
+    return { n: shared.length, abs: mean(d.map(Math.abs)), signed: mean(d), exact: d.filter((x) => x === 0).length, shared };
+  }
+  function renderRivals(prs) {
+    const pairs = [];
+    for (let i = 0; i < prs.length; i++) for (let j = i + 1; j < prs.length; j++) {
+      const st = pairStats(prs[i], prs[j]); if (st.n) pairs.push({ a: prs[i], b: prs[j], ...st });
+    }
+    if (!pairs.length) return;
+    pairs.sort((x, y) => x.abs - y.abs);
+    const soul = pairs[0], rival = pairs.at(-1);
+    const lo = soul.abs, hi = rival.abs;
+    const pct = (p) => Math.round((p.exact / p.n) * 100);
+    $("rsCallouts").innerHTML = `
+      <div class="rs soul" data-tip="${esc(`<b>Soulmates</b><br>${esc(soul.a.name)} and ${esc(soul.b.name)} were ${f2(soul.abs)} steps apart on average, the closest pair in the pod. Same exact grade on ${soul.exact} of ${soul.n} cards (${pct(soul)}%).`)}">
+        <div class="lbl">Soulmates</div><div class="names">${esc(soul.a.name)} &amp; ${esc(soul.b.name)}</div>
+        <div class="m">${f2(soul.abs)} steps apart · ${pct(soul)}% exact matches</div></div>
+      <div class="rs rival" data-tip="${esc(`<b>Rivals</b><br>${esc(rival.a.name)} and ${esc(rival.b.name)} were ${f2(rival.abs)} steps apart on average, the furthest pair in the pod. Same exact grade on only ${rival.exact} of ${rival.n} cards (${pct(rival)}%).`)}">
+        <div class="lbl">Rivals</div><div class="names">${esc(rival.a.name)} &amp; ${esc(rival.b.name)}</div>
+        <div class="m">${f2(rival.abs)} steps apart · ${pct(rival)}% exact matches</div></div>`;
+
+    // Matrix: gold is closer; the soulmate and rival cells are outlined
+    const find = (a, b) => pairs.find((p) => (p.a === a && p.b === b) || (p.a === b && p.b === a));
+    let m = `<div class="matrix" style="grid-template-columns:max-content repeat(${prs.length}, 1fr)"><div></div>${prs.map((p) => `<div class="mh">${esc(p.name)}</div>`).join("")}`;
+    for (const a of prs) {
+      m += `<div class="mh row">${esc(a.name)}</div>`;
+      for (const b of prs) {
+        if (a === b) { m += `<div class="mc self">—</div>`; continue; }
+        const p = find(a, b); if (!p) { m += `<div class="mc self">·</div>`; continue; }
+        const t = hi > lo ? (hi - p.abs) / (hi - lo) : 1;          // 1 = closest pair, 0 = furthest
+        const alpha = (0.08 + 0.8 * t).toFixed(2);
+        const lean = a === p.a ? p.signed : -p.signed;
+        const tipTxt = `<b>${esc(a.name)} vs ${esc(b.name)}</b><br>${f2(p.abs)} steps apart on average<br>`
+          + (Math.abs(lean) < 0.05 ? "No overall lean" : `${esc(a.name)} grades ${f1(Math.abs(lean))} steps ${lean > 0 ? "higher" : "lower"} on average`)
+          + `<br>Exact same grade on ${p.exact} cards (${pct(p)}%)`;
+        m += `<div class="mc ${t > 0.55 ? "dark-text" : ""} ${p === soul || p === rival ? "hl" : ""}" style="--a:${alpha}" data-tip="${esc(tipTxt)}">${f1(p.abs)}</div>`;
+      }
+    }
+    $("matrix").innerHTML = m + "</div>";
+
+    // The cards that split the rivals most
+    const splits = rival.shared.map((c) => ({ c, d: rival.a.g[c.id] - rival.b.g[c.id] })).sort((x, y) => Math.abs(y.d) - Math.abs(x.d)).slice(0, 6);
+    $("rivalCards").innerHTML = `<p class="sub-h">What split ${esc(rival.a.name)} &amp; ${esc(rival.b.name)}</p><div class="clist">`
+      + splits.map(({ c, d }) => `<div class="crow" style="grid-template-columns:34px 1fr auto"><img src="${c.small}" alt="" loading="lazy" data-zoom="${c.id}">
+        <div class="nm">${esc(c.name)}<small>${Math.abs(d)} steps apart</small></div>
+        <div class="pair-chips"><span>${esc(rival.a.name)} ${chip(rival.a.g[c.id])}</span><span>${esc(rival.b.name)} ${chip(rival.b.g[c.id])}</span></div></div>`).join("")
+      + `</div>`;
+  }
+
+  // ---------- Unanimous & divisive ----------
+  const everyone = (prs, c) => prs.map((p) => ({ p, v: p.g[c.id] })).filter((x) => x.v != null);
+  function renderSplit(prs) {
+    const rows = cards.map((c) => {
+      const e = everyone(prs, c); if (e.length < 2) return null;
+      const vs = e.map((x) => x.v);
+      return { c, e, range: Math.max(...vs) - Math.min(...vs), sd: sd(vs), avg: mean(vs) };
+    }).filter(Boolean);
+    const div = [...rows].sort((a, b) => b.range - a.range || b.sd - a.sd).slice(0, 10);
+    $("divisive").innerHTML = div.map((r) => {
+      const hiP = r.e.reduce((a, b) => (b.v > a.v ? b : a)), loP = r.e.reduce((a, b) => (b.v < a.v ? b : a));
+      const tipTxt = `<b>${esc(r.c.name)}</b><br>Grades ranged ${r.range} steps, from ${letter(loP.v)} (${esc(loP.p.name)}) to ${letter(hiP.v)} (${esc(hiP.p.name)}).<br>Pod average ${letter(r.avg)} (${f1(r.avg)}), spread σ ${f2(r.sd)}.`;
+      return `<div class="crow dv" data-tip="${esc(tipTxt)}"><img src="${r.c.small}" alt="" loading="lazy" data-zoom="${r.c.id}">
+        <div class="nm">${esc(r.c.name)}<small>${r.range} steps between highest and lowest</small></div>
+        <div class="row2">${[...r.e].sort((a, b) => b.v - a.v).map((x) => `<span>${chip(x.v)}${esc(x.p.name)}</span>`).join("")}</div></div>`;
+    }).join("");
+
+    // Everyone gave the exact same grade; if nobody did, fall back to "within one step"
+    let unan = rows.filter((r) => r.range === 0), strict = true;
+    if (!unan.length) { unan = rows.filter((r) => r.range <= 1); strict = false; }
+    unan.sort((a, b) => b.avg - a.avg || a.c.cn - b.c.cn);
+    $("unanTitle").textContent = strict ? `Unanimous (${unan.length})` : `Near-unanimous: within 1 step (${unan.length})`;
+    $("unanimous").innerHTML = unan.length
+      ? `<div class="unan">${unan.map((r) => `<div class="u" data-tip="${esc(`<b>${esc(r.c.name)}</b><br>${strict ? `Everyone gave it ${letter(r.avg)}.` : `Everyone within one step: ${[...new Set(r.e.map((x) => letter(x.v)))].join(" / ")}.`}`)}">
+          <img src="${r.c.small}" alt="${esc(r.c.name)}" loading="lazy" data-zoom="${r.c.id}">${chip(r.avg)}</div>`).join("")}</div>`
+      : `<p class="empty-note">The pod never fully agreed on a single card.</p>`;
+  }
+
+  // ---------- Blind spots ----------
+  function renderChamps(prs) {
+    $("champs").innerHTML = prs.map((p) => {
+      let best = null;
+      for (const c of cards) {
+        const mine = p.g[c.id]; if (mine == null) continue;
+        const others = prs.filter((o) => o !== p).map((o) => o.g[c.id]).filter((v) => v != null);
+        if (!others.length) continue;
+        const d = mine - mean(others);
+        if (!best || d > best.d + 1e-9) best = { c, d, mine, others: mean(others) };
+      }
+      if (!best || best.d <= 0) return "";
+      const tipTxt = `<b>${esc(p.name)}: ${esc(best.c.name)}</b><br>Graded it ${letter(best.mine)}; everyone else averaged ${letter(best.others)} (${f1(best.others)}). That's ${sgn(best.d)} steps, the most ${esc(p.name)} rated any card above the rest of the pod.`;
+      return `<div class="champ" data-tip="${esc(tipTxt)}"><img src="${best.c.small}" alt="" loading="lazy" data-zoom="${best.c.id}">
+        <div><div class="who">${esc(p.name)}</div><div class="nm">${esc(best.c.name)}</div>
+        <div class="m">${letter(best.mine)} vs pod ${letter(best.others)} · ${sgn(best.d)} steps</div></div></div>`;
+    }).join("");
+  }
+
+  // ---------- Pod consensus tier list ----------
+  let tierColor = "all", tierPrs = [];
+  function renderTier() {
+    $("tierColors").innerHTML = [["all", "All"], ...Object.entries(COLOR_NAMES)].map(([k, l]) =>
+      `<button data-tc="${k}" class="${tierColor === k ? "on" : ""}">${k !== "all" ? `<span class="sw" style="background:var(--${k})"></span>` : ""}${l}</button>`).join("");
+    const avgs = cards.filter((c) => tierColor === "all" || c.color === tierColor)
+      .map((c) => ({ c, e: everyone(tierPrs, c) })).filter((x) => x.e.length).map((x) => ({ ...x, avg: mean(x.e.map((y) => y.v)) }));
+    $("podTier").innerHTML = [...GRADES].reverse().map((lab) => {
+      const v = GRADES.indexOf(lab);
+      const xs = avgs.filter((x) => Math.round(x.avg) === v).sort((a, b) => b.avg - a.avg || a.c.cn - b.c.cn);
+      return `<div class="tier"><div class="tier-l" style="background:${gradeColor(v)}">${lab}</div><div class="tier-cards">${
+        xs.map((x) => `<img src="${x.c.small}" alt="${esc(x.c.name)}" loading="lazy" data-zoom="${x.c.id}"
+          data-tip="${esc(`<b>${esc(x.c.name)}</b><br>Pod average ${f2(x.avg)}<br><span class="m">${[...x.e].sort((a, b) => b.v - a.v).map((y) => `${esc(y.p.name)} ${letter(y.v)}`).join(" · ")}</span>`)}">`).join("")
+        || `<span class="none">—</span>`}</div></div>`;
+    }).join("");
+  }
+  document.addEventListener("click", (e) => { const b = e.target.closest("[data-tc]"); if (b) { tierColor = b.dataset.tc; renderTier(); } });
+
   // ---------- Boot ----------
   (async () => {
     let passOk = false;
@@ -298,5 +415,7 @@
     const prs = players.map(profile).sort((a, b) => a.name.localeCompare(b.name));
     $("status").hidden = true; $("report").hidden = false;
     render(prs);
+    renderRivals(prs); renderSplit(prs); renderChamps(prs);
+    tierPrs = prs; renderTier();
   })();
 })();

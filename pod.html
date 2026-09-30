@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
 <link rel="stylesheet" href="styles.css?v=9">
 <link rel="stylesheet" href="analysis.css?v=2">
-<link rel="stylesheet" href="pod.css?v=1">
+<link rel="stylesheet" href="pod.css?v=2">
 </head>
 <body>
 
@@ -34,12 +34,32 @@
     </section>
 
     <nav class="jump" aria-label="Sections">
-      <a href="#sec-awards">Awards</a><a href="#sec-pairs">Color pairs</a><a href="#sec-favs">Favorite cards</a>
+      <a href="#sec-awards">Awards</a><a href="#sec-rivals">Rivals</a><a href="#sec-split">Divisive</a><a href="#sec-champs">Blind spots</a><a href="#sec-pairs">Color pairs</a><a href="#sec-favs">Favorite cards</a><a href="#sec-tier">Pod tier list</a>
     </nav>
 
     <section class="panel" id="sec-awards">
       <header><h2>Awards</h2><p>Hover (or tap) an award to see why it was given.</p></header>
       <div class="awards" id="awards"></div>
+    </section>
+
+    <section class="panel" id="sec-rivals">
+      <header><h2>Rivals &amp; soulmates</h2><p>Average grade difference between every pair of players, in grade steps (B vs B- = 1). Gold = closer. Hover a cell for details.</p></header>
+      <div class="rs-callouts" id="rsCallouts"></div>
+      <div class="matrix-wrap"><div id="matrix"></div></div>
+      <div id="rivalCards"></div>
+    </section>
+
+    <section class="panel" id="sec-split">
+      <header><h2>Unanimous &amp; divisive</h2><p>Cards the whole pod agreed on, and the ones that split you the most.</p></header>
+      <div class="split">
+        <div><p class="sub-h">Most divisive</p><div class="clist" id="divisive"></div></div>
+        <div><p class="sub-h" id="unanTitle">Unanimous</p><div id="unanimous"></div></div>
+      </div>
+    </section>
+
+    <section class="panel" id="sec-champs">
+      <header><h2>Pod blind spots</h2><p>For each player, the card they rated furthest above everyone else. The one they'd fight for.</p></header>
+      <div class="champs" id="champs"></div>
     </section>
 
     <section class="panel" id="sec-pairs">
@@ -52,6 +72,12 @@
       <header><h2>Favorite cards</h2><p>Each player's highest-graded card. Ties are broken by their best-rated color, then rarity. Hover for how it was decided.</p></header>
       <div class="favs" id="favs"></div>
     </section>
+
+    <section class="panel" id="sec-tier">
+      <header class="with-tools"><div><h2>Pod consensus tier list</h2><p>Every card by the pod's average grade. The pod's official set review. Hover a card for everyone's grades.</p></div>
+        <div class="seg" id="tierColors" role="group" aria-label="Filter tier list by color"></div></header>
+      <div id="podTier"></div>
+    </section>
   </div>
 </main>
 
@@ -59,6 +85,6 @@
 <dialog id="zoom"><img id="zoomImg" alt=""><p id="zoomCap"></p></dialog>
 
 <script src="config.js?v=9"></script>
-<script src="pod.js?v=3"></script>
+<script src="pod.js?v=4"></script>
 </body>
 </html>
