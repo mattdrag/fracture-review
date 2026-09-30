@@ -150,3 +150,6 @@
   .big-grade { font-size: 48px; }
 }
 @media (prefers-reduced-motion: reduce) { .hb-bar { transition: none; } }
+
+.align-top { margin: 0 0 14px; font-size: 15px; }
+.align-top b { color: var(--gold); font-weight: 600; }

@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
 <link rel="stylesheet" href="styles.css?v=9">
-<link rel="stylesheet" href="analysis.css?v=1">
+<link rel="stylesheet" href="analysis.css?v=2">
 </head>
 <body>
 
@@ -98,6 +98,11 @@
       <div class="split" id="chTakes"></div>
     </section>
 
+    <section class="panel" id="sec-align" data-title="Alignment">
+      <header><h2>Pod alignment</h2><p>Your average grade difference from each player on the cards you both graded, in grade steps (B vs B- = 1). Shorter bar = more aligned.</p></header>
+      <div id="chAlign"></div>
+    </section>
+
     <section class="panel" id="sec-best" data-title="Best & worst">
       <header><h2>Best &amp; worst</h2></header>
       <div class="split" id="chBest"></div>
@@ -121,6 +126,6 @@
 <dialog id="zoom"><img id="zoomImg" alt=""><p id="zoomCap"></p></dialog>
 
 <script src="config.js?v=9"></script>
-<script src="analysis.js?v=1"></script>
+<script src="analysis.js?v=2"></script>
 </body>
 </html>

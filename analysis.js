@@ -308,6 +308,24 @@
     $("chTakes").innerHTML = `<div class="legend" style="grid-column:1/-1"><span>Number = your grade minus ${esc(cmp.label)}, in grade steps</span></div>`
       + col(`Higher than ${esc(cmp.short)}`, hi) + col(`Lower than ${esc(cmp.short)}`, lo);
   }
+  function secAlign() {
+    const rows = pod.map((p) => {
+      const shared = graded(me.grades).filter((c) => p.grades?.[c.id] != null);
+      const diffs = shared.map((c) => me.grades[c.id] - p.grades[c.id]);
+      return { name: p.display, n: shared.length, abs: mean(diffs.map(Math.abs)), signed: mean(diffs) };
+    }).filter((r) => r.n).sort((a, b) => a.abs - b.abs);
+    if (!rows.length) { $("chAlign").innerHTML = `<p class="empty-note">No cards in common with anyone yet.</p>`; return; }
+    const max = Math.max(2, ...rows.map((r) => r.abs));
+    const lean = (v) => Math.abs(v) < 0.05 ? "no overall lean" : `you grade ${Math.abs(v).toFixed(1)} steps ${v > 0 ? "higher" : "lower"} on average`;
+    const body = rows.map((r, i) => {
+      const tipTxt = `<b>${esc(r.name)}</b><br>Average difference: ${r.abs.toFixed(2)} steps<br>${lean(r.signed)}<br><span class="m">${r.n} cards in common</span>`;
+      return `<div class="hb-lbl">${esc(r.name)}${i === 0 ? `<small>closest</small>` : ""}</div>
+        <div class="hb-track" data-tip="${esc(tipTxt)}"><div class="hb-bar" style="width:${(r.abs / max) * 100}%;${i === 0 ? "background:var(--gold)" : ""}"></div></div>
+        <div class="hb-val">${r.abs.toFixed(1)}<em>steps</em></div>`;
+    }).join("");
+    const top = rows[0];
+    $("chAlign").innerHTML = `<p class="align-top">Most aligned with <b>${esc(top.name)}</b>: ${top.abs.toFixed(1)} steps apart on average, ${lean(top.signed)}.</p><div class="hb">${body}</div>`;
+  }
   function secCommons(cmp) {
     const cols = COLORS.map(({ key, label }) => {
       const xs = graded(me.grades, cards.filter((c) => c.rarity === "common" && c.color === key)).sort((a, b) => me.grades[b.id] - me.grades[a.id]).slice(0, 5);
@@ -369,9 +387,9 @@
   // ---------- Compare controls ----------
   const SECTIONS = {
     "sec-colors": secColors, "sec-archetypes": secArch, "sec-dist": secDist, "sec-rarity": secRarity, "sec-curve": secCurve,
-    "sec-types": secTypes, "sec-creatures": secBodies, "sec-takes": secTakes, "sec-best": secBest, "sec-commons": secCommons, "sec-tier": secTier,
+    "sec-types": secTypes, "sec-creatures": secBodies, "sec-takes": secTakes, "sec-align": secAlign, "sec-best": secBest, "sec-commons": secCommons, "sec-tier": secTier,
   };
-  const NO_COMPARE = new Set(["sec-creatures", "sec-tier"]);
+  const NO_COMPARE = new Set(["sec-creatures", "sec-tier", "sec-align"]);
   function renderSection(id) { SECTIONS[id](source(cmpChoice[id])); }
   function mountCompare() {
     for (const id of Object.keys(SECTIONS)) {
@@ -390,7 +408,7 @@
       header.appendChild(box);
     }
     // Hot takes only makes sense with a comparison available
-    $("sec-takes").hidden = !(me.submitted && pod.length);
+    $("sec-takes").hidden = $("sec-align").hidden = !(me.submitted && pod.length);
     if (me.submitted && pod.length) { cmpChoice["sec-takes"] = "pod"; $("cmp-sec-takes").value = "pod"; }
   }
   document.addEventListener("change", (e) => {
