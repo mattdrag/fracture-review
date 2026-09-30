@@ -1,0 +1,42 @@
+/* Pod rundown page. Builds on styles.css + analysis.css. */
+.pod-hero { text-align: center; padding: 34px 20px 26px; border: 1px solid var(--line); border-radius: 14px;
+  background: radial-gradient(700px 260px at 50% 0%, rgba(232,199,118,.16), transparent 70%), linear-gradient(180deg, #1c1730, #120f1e); }
+.pod-hero .pname { margin-bottom: 10px; }
+.pod-lede { margin: 0 auto; max-width: 60ch; color: #d9d3ea; font-size: 16px; text-wrap: balance; }
+.pod-lede b { color: var(--gold); font-weight: 600; }
+
+/* Awards */
+.awards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+.award { position: relative; padding: 18px 16px 16px; border: 1px solid #3a3257; border-radius: 12px; cursor: help;
+  background: linear-gradient(180deg, rgba(232,199,118,.07), rgba(18,15,30,.4)); display: grid; gap: 6px; align-content: start;
+  transition: border-color .15s, transform .15s; }
+.award:hover, .award:focus-visible { border-color: var(--gold); transform: translateY(-2px); outline: none; }
+.award .medal { width: 30px; height: 30px; }
+.award h3 { margin: 0; font: 700 16px Cinzel, Georgia, serif; letter-spacing: .04em; color: var(--gold); }
+.award .blurb { margin: 0; font-size: 12px; color: var(--muted); }
+.award .winner { font: 700 24px/1.15 Cinzel, Georgia, serif; color: var(--ink); margin-top: 4px; }
+.award .stat { font: 500 12px "JetBrains Mono", monospace; color: #cbc4de; }
+.award .why { position: absolute; top: 12px; right: 12px; width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--line);
+  display: grid; place-items: center; font: 600 11px Barlow, sans-serif; color: var(--muted); }
+.award .card-mini { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
+.award .card-mini img { width: 34px; border-radius: 3px; cursor: zoom-in; }
+
+/* Color pairs */
+.pair-sum { margin: 0 0 14px; font-size: 15px; }
+.pair-sum b { color: var(--gold); font-weight: 600; }
+.pairs { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.pair { padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: rgba(10,9,18,.35); display: grid; gap: 8px; cursor: default; }
+.pair .who { font-weight: 600; font-size: 15px; color: var(--ink); }
+.pair .guild { display: flex; align-items: center; gap: 8px; font: 700 18px Cinzel, Georgia, serif; }
+.pair .guild .pips .sw { width: 14px; height: 14px; }
+.pair .strip { height: 6px; border-radius: 3px; }
+.pair .ds { font: 500 12px "JetBrains Mono", monospace; color: var(--muted); }
+
+/* Favorite cards */
+.favs { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; }
+.fav { display: grid; gap: 8px; cursor: default; }
+.fav img { width: 100%; border-radius: 10px; cursor: zoom-in; display: block; box-shadow: 0 8px 24px rgba(0,0,0,.5); transition: transform .2s; }
+.fav img:hover { transform: translateY(-4px) rotate(-1deg); }
+.fav .who { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-weight: 600; }
+.fav .nm { font-size: 13px; color: var(--muted); margin-top: -4px; }
+.fav .tie { font-size: 11px; color: var(--muted); }

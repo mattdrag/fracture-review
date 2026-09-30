@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pod Rundown · Reality Fracture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="styles.css?v=9">
+<link rel="stylesheet" href="analysis.css?v=2">
+<link rel="stylesheet" href="pod.css?v=1">
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <span class="set-glyph">FRA</span>
+    <div>
+      <div class="brand-name">Pod Rundown</div>
+      <p class="sub">Reality Fracture · pod set review</p>
+    </div>
+  </div>
+  <a class="back-link" href="./">← Back to review</a>
+</header>
+
+<main class="an">
+  <p class="an-status" id="status">Loading the pod…</p>
+
+  <div id="report" hidden>
+    <section class="pod-hero">
+      <p class="eyebrow-sm" id="podSub"></p>
+      <h1 class="pname">The Pod Rundown</h1>
+      <p class="pod-lede" id="podLede"></p>
+    </section>
+
+    <nav class="jump" aria-label="Sections">
+      <a href="#sec-awards">Awards</a><a href="#sec-pairs">Color pairs</a><a href="#sec-favs">Favorite cards</a>
+    </nav>
+
+    <section class="panel" id="sec-awards">
+      <header><h2>Awards</h2><p>Hover (or tap) an award to see why it was given.</p></header>
+      <div class="awards" id="awards"></div>
+    </section>
+
+    <section class="panel" id="sec-pairs">
+      <header><h2>Favorite color pairs</h2><p>Each player's strongest two-color deck: the average of their best 23 cards castable in that pair. Hover for their runner-up.</p></header>
+      <div id="pairSummary"></div>
+      <div class="pairs" id="pairs"></div>
+    </section>
+
+    <section class="panel" id="sec-favs">
+      <header><h2>Favorite cards</h2><p>Each player's highest-graded card. Ties are broken by their best-rated color, then rarity. Hover for how it was decided.</p></header>
+      <div class="favs" id="favs"></div>
+    </section>
+  </div>
+</main>
+
+<div class="tip" id="tip" role="tooltip" hidden></div>
+<dialog id="zoom"><img id="zoomImg" alt=""><p id="zoomCap"></p></dialog>
+
+<script src="config.js?v=9"></script>
+<script src="pod.js?v=3"></script>
+</body>
+</html>
