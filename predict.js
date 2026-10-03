@@ -118,7 +118,8 @@
     const wm = mean(wrs), ws = sd(wrs);
     const zw = new Map(ids.map((id) => [id, clip((wr.get(id) - wm) / ws)]));
 
-    const ranked = players.map((pl) => {
+    // The 17lands user is excluded: it would be grading against itself
+    const ranked = players.filter((pl) => (pl.display || "").toLowerCase() !== "17lands").map((pl) => {
       const g = pl.grades || {};
       const mine = ids.filter((id) => g[id] != null);
       if (mine.length < 20) return null;

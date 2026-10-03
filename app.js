@@ -239,6 +239,55 @@
   async function refreshReviews() {
     try { allReviews = await store.all(); } catch (e) { console.error(e); }
   }
+
+  // ---------- 17lands user ----------
+  // Grades every card from 17lands' games-in-hand win rate. Cards are ranked by win rate and
+  // handed grades from the pod's pooled grade distribution, so 17lands grades on the same curve
+  // the pod uses. 17lands doesn't publish win rates for cards under 500 games; those stay ungraded.
+  const BOT = "17lands";
+  function show17Ungraded() {
+    const bot = allReviews.find((r) => r.reviewer === BOT);
+    const n = bot ? cards.filter((c) => bot.grades?.[c.id] == null).length : null;
+    $("ungraded17").textContent = n == null ? "Not created yet" : n ? `${n} card${n === 1 ? "" : "s"} ungraded (too few games on 17lands)` : "All cards graded";
+  }
+  async function refresh17lands() {
+    const btn = $("refresh17");
+    btn.disabled = true; btn.textContent = "Refreshing 17lands…";
+    try {
+      const r = await fetch(`https://www.17lands.com/card_ratings/data?expansion=${CFG.SET_CODE.toUpperCase()}&format=PremierDraft`, { cache: "no-store" });
+      if (!r.ok) throw new Error(`17lands ${r.status}`);
+      const perf = await r.json();
+      const byFront = new Map(cards.map((c) => [c.name.split(" // ")[0], c]));
+      const rated = [];
+      for (const p of perf) {
+        if (p.ever_drawn_win_rate == null) continue;
+        const c = byFront.get(p.name.split(" // ")[0]);
+        if (c) rated.push({ c, wr: p.ever_drawn_win_rate, note: `GIH WR ${(p.ever_drawn_win_rate * 100).toFixed(1)}% · ${p.ever_drawn_game_count.toLocaleString()} games` });
+      }
+      if (rated.length < 20) throw new Error("not enough 17lands data yet");
+
+      await refreshReviews();
+      const pooled = allReviews.filter((x) => x.reviewer !== BOT && x.submitted)
+        .flatMap((x) => Object.values(x.grades || {})).filter((v) => v != null).sort((a, b) => a - b);
+      rated.sort((a, b) => a.wr - b.wr);
+      const grades = {}, notes = {};
+      rated.forEach(({ c, note }, i) => {
+        const q = (i + 0.5) / rated.length;
+        grades[c.id] = pooled.length ? pooled[Math.min(pooled.length - 1, Math.floor(q * pooled.length))]
+          : Math.round(q * 12); // no pod grades yet: spread evenly across F..A+
+        notes[c.id] = note;
+      });
+      await store.save({ reviewer: BOT, display: BOT, grades, notes, submitted: true });
+      await refreshReviews();
+      if (me?.reviewer === BOT) { me = { ...me, grades, notes }; }
+      render(); show17Ungraded();
+      btn.textContent = `17lands updated ✓ (${rated.length} cards)`;
+    } catch (e) {
+      console.error(e);
+      btn.textContent = "17lands refresh failed. Try again";
+    }
+    setTimeout(() => { btn.disabled = false; btn.textContent = "Refresh 17lands user"; }, 4000);
+  }
   function renderResults() {
     const subOnly = $("submittedOnly").checked;
     const pool = allReviews.filter((r) => !subOnly || r.submitted);
@@ -338,6 +387,7 @@
     view = "review";
     syncUnlock();
     render();
+    show17Ungraded();
   }
 
   // ---------- Events ----------
@@ -361,6 +411,7 @@
   $("passInput").addEventListener("input", () => { $("gateError").hidden = true; });
   // Browsers that already passed don't need to type it again
   function syncPassField() { const ok = hasPass(); $("passInput").hidden = ok; $("passInput").required = !ok; }
+  $("refresh17").addEventListener("click", refresh17lands);
   $("switchUser").addEventListener("click", async () => {
     await flushSave(); try { localStorage.removeItem("rf_me"); } catch {}
     me = null; $("app").hidden = true; $("views").hidden = true; $("who").hidden = true; $("gate").hidden = false; $("nameInput").value = ""; renderLanding(); syncPassField(); scrollTo(0, 0);
