@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jace's Futuresight · Reality Fracture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Barlow:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="styles.css?v=9">
+<link rel="stylesheet" href="predict.css?v=2">
+</head>
+<body class="fs">
+
+<a class="fs-back" href="./">← Back</a>
+<canvas id="hole" aria-hidden="true"></canvas>
+<div class="fs-flash" id="flash" aria-hidden="true"></div>
+
+<main class="fs-stage">
+  <h1 class="fs-title" id="title">Jace's Futuresight</h1>
+
+  <button class="fs-orb" id="reveal" type="button">
+    <span>Reveal<br>the future</span>
+  </button>
+
+  <ol class="fs-list" id="list" hidden></ol>
+  <p class="fs-msg" id="msg" role="status" aria-live="polite"></p>
+  <button class="fs-again" id="again" type="button" hidden>Gaze again</button>
+</main>
+
+<script src="config.js?v=9"></script>
+<script src="predict.js?v=1"></script>
+</body>
+</html>
